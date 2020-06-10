@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\Hamster\src\Hamster.Plugin\Hamster.Plugin.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="IronPython" Version="2.7.10" />
+    </ItemGroup>
+
+</Project>
