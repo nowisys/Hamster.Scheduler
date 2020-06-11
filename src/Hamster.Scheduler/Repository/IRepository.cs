@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using NCM.Service.Scheduler.Repository;
 
 namespace Hamster.Scheduler.Repository
 {

@@ -1,12 +1,11 @@
 ﻿using System.Linq;
-using NCM.Service.Scheduler.Repository;
 
 namespace Hamster.Scheduler.Repository
 {
   public class RepoService<TKey, TData> : IRepoService<TData>
   {
-    private IKeyConverter<TKey> converter;
-    private IRepository<TKey, TData> repository;
+    private readonly IKeyConverter<TKey> converter;
+    private readonly IRepository<TKey, TData> repository;
 
     public RepoService(IRepository<TKey, TData> repository)
       : this(repository, new KeyConverter<TKey>())
@@ -19,12 +18,7 @@ namespace Hamster.Scheduler.Repository
       this.repository = repository;
       this.converter = converter;
     }
-
-    public IRepository<TKey, TData> Repository
-    {
-      get { return repository; }
-    }
-
+    
     public virtual string[] GetKeys()
     {
       return (from k in repository.GetKeys()

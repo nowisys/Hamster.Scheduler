@@ -5,7 +5,6 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 using Hamster.Scheduler.Repository;
-using NCM.Service.Scheduler.Repository;
 
 namespace Hamster.Scheduler.Data
 {
@@ -21,7 +20,7 @@ namespace Hamster.Scheduler.Data
         throw new ArgumentException("The 'path' parameter must not be empty");
 
       FileInfo file = new FileInfo(path);
-      if (!file.Directory.Exists)
+      if (file.Directory != null && !file.Directory.Exists)
       {
         file.Directory.Create();
       }
@@ -45,7 +44,7 @@ namespace Hamster.Scheduler.Data
     public EventInfo Get(string key)
     {
       return (from e in GetItems()
-              where string.Compare(e.Name, key, true) == 0
+              where String.Compare(e.Name, key, StringComparison.Ordinal) == 0
               select e).FirstOrDefault();
     }
 

@@ -6,16 +6,16 @@ namespace Hamster.Scheduler.Commands
 {
   public class ScriptCommand : ICommand
   {
-    private ScriptScope scope;
-    private CompiledCode code;
+    private readonly ScriptScope scope;
+    private readonly CompiledCode code;
 
     public ScriptCommand(CompiledCode code, ScriptScope scope)
     {
       if ((this.code = code) == null)
-        throw new ArgumentNullException("code");
+        throw new ArgumentNullException(nameof(code));
 
       if ((this.scope = scope) == null)
-        throw new ArgumentNullException("scope");
+        throw new ArgumentNullException(nameof(scope));
     }
 
     public void Invoke(IDictionary<string, object> parameters)

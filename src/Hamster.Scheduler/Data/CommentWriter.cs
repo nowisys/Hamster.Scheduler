@@ -6,22 +6,15 @@ namespace Hamster.Scheduler.Data
 {
   public class CommentWriter : TextWriter
   {
-    private char prev;
     private bool linebreak = true;
-    private TextWriter baseWriter;
+    private readonly TextWriter baseWriter;
 
     public CommentWriter(TextWriter baseWriter)
     {
-      if (baseWriter == null)
-        throw new ArgumentNullException("baseWriter");
-
-      this.baseWriter = baseWriter;
+      this.baseWriter = baseWriter ?? throw new ArgumentNullException(nameof(baseWriter));
     }
 
-    public override Encoding Encoding
-    {
-      get { return baseWriter.Encoding; }
-    }
+    public override Encoding Encoding => baseWriter.Encoding;
 
     public override void Write(char value)
     {
@@ -49,8 +42,6 @@ namespace Hamster.Scheduler.Data
           linebreak = false;
           break;
       }
-
-      prev = value;
     }
   }
 }

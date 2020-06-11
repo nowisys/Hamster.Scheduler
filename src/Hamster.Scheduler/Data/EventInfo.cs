@@ -7,10 +7,6 @@ namespace Hamster.Scheduler.Data
     [DataContract()]
     public class EventInfo
     {
-        public EventInfo()
-        {
-        }
-
         [DataMember(Name = "name")] 
         public string Name { get; set; }
 

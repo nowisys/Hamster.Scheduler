@@ -11,10 +11,8 @@ namespace Hamster.Scheduler.Data
     public void AddSchedule(CronScheduleInfo schedule, TextReader reader, TextWriter writer)
     {
       List<string> comments = new List<string>();
-      int lineno = 0;
       foreach (string line in GetLines(reader))
       {
-        lineno += 1;
         if (IsComment(line))
         {
           comments.Add(line);
@@ -22,7 +20,7 @@ namespace Hamster.Scheduler.Data
         else
         {
           var cur = ParseSchedule(line);
-          if (cur == null || string.Compare(cur.Name, schedule.Name, true) != 0)
+          if (cur == null || string.Compare(cur.Name, schedule.Name, StringComparison.Ordinal) != 0)
           {
             foreach (string c in comments)
               writer.WriteLine(c);
@@ -30,7 +28,7 @@ namespace Hamster.Scheduler.Data
           }
           else
           {
-            throw new ArgumentException(string.Format("There is already a schedule with the name '{0}'.", schedule.Name));
+            throw new ArgumentException($"There is already a schedule with the name '{schedule.Name}'.");
           }
           comments.Clear();
         }
@@ -48,10 +46,8 @@ namespace Hamster.Scheduler.Data
     public IEnumerable<CronScheduleInfo> ReadSchedules(TextReader reader)
     {
       List<string> comments = new List<string>();
-      int lineno = 0;
       foreach (string line in GetLines(reader))
       {
-        lineno += 1;
         if (IsComment(line))
         {
           comments.Add(line);
@@ -90,10 +86,8 @@ namespace Hamster.Scheduler.Data
     public void RemoveSchedule(string name, TextReader reader, TextWriter writer)
     {
       List<string> comments = new List<string>();
-      int lineno = 0;
       foreach (string line in GetLines(reader))
       {
-        lineno += 1;
         if (IsComment(line))
         {
           comments.Add(line);
@@ -101,7 +95,7 @@ namespace Hamster.Scheduler.Data
         else
         {
           var sched = ParseSchedule(line);
-          if (sched == null || string.Compare(sched.Name, name, true) != 0)
+          if (sched == null || string.Compare(sched.Name, name, StringComparison.Ordinal) != 0)
           {
             foreach (string c in comments)
               writer.WriteLine(c);
@@ -146,7 +140,7 @@ namespace Hamster.Scheduler.Data
       if (line.Length == 0)
         return null;
 
-      string[] parts = line.Split(new char[] { ' ', '\t' }, 6);
+      string[] parts = line.Split(new[] { ' ', '\t' }, 6);
       if (parts.Length < 6)
       {
         throw new FormatException();

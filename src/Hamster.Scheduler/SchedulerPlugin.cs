@@ -14,41 +14,33 @@ namespace Hamster.Scheduler
   {
 
 
-    private ScriptRuntime runtime;
-
-    private List<SchedulerItem> schedulerItems = new List<SchedulerItem>();
+    private readonly ScriptRuntime runtime;
+    private readonly List<SchedulerItem> schedulerItems = new List<SchedulerItem>();
+    private readonly SchedulerQueue schedulerQueue;
     private Dictionary<string, ScriptCommand> commands = new Dictionary<string, ScriptCommand>(StringComparer.InvariantCultureIgnoreCase);
-
-    private SchedulerQueue schedulerQueue;
     private AutoResetEvent executeEvent;
     private RegisteredWaitHandle executeHandle;
     
-    public  IPluginDirectory Plugins { get; private set; }
+    public  IPluginDirectory Plugins { get; set; }
     public IRepository<string, EventInfo> EventManager { get; private set; }
     public IRepository<string, CronScheduleInfo> ScheduleManager { get; private set; }
     public IRepository<string, CommandInfo> CommandManager { get; private set; }
     
-
-
     public SchedulerPlugin()
-      : this(IronPython.Hosting.Python.CreateRuntime())
-    {
-    }
-    
-    public SchedulerPlugin(ScriptRuntime runtime)
     {
       schedulerQueue = new SchedulerQueue();
       schedulerQueue.ItemsChanged += SchedulerQueueChanged;
-      this.runtime = runtime;
+      this.runtime = IronPython.Hosting.Python.CreateRuntime();
       
-      EventManager = new EventRepository(Settings.EventsPath);
-      ScheduleManager = new ScheduleRepository(Settings.CrontabPath);
-      CommandManager = new CommandRepository(Settings.CommandsDirectory, runtime);
+      
     }
     
     public override void Init()
     {
-
+      EventManager = new EventRepository(Settings.EventsPath);
+      ScheduleManager = new ScheduleRepository(Settings.CrontabPath);
+      CommandManager = new CommandRepository(Settings.CommandsDirectory, runtime);
+      
       LoadCommands();
     }
 
@@ -59,10 +51,7 @@ namespace Hamster.Scheduler
       try
       {
         ICommand startup = GetCommand("@startup");
-        if (startup != null)
-        {
-          startup.Invoke(null);
-        }
+        startup?.Invoke(null);
       }
       catch (Exception x)
       {
@@ -75,10 +64,7 @@ namespace Hamster.Scheduler
       try
       {
         ICommand shutdown = GetCommand("@shutdown");
-        if (shutdown != null)
-        {
-          shutdown.Invoke(null);
-        }
+        shutdown?.Invoke(null);
       }
       catch (Exception x)
       {
@@ -199,13 +185,14 @@ namespace Hamster.Scheduler
 
         try
         {
-          ScriptEngine engine;
-          if (!runtime.TryGetEngineByFileExtension(info.Language, out engine))
+          if (!runtime.TryGetEngineByFileExtension(info.Language, out var engine))
+          {
             engine = runtime.GetEngine(info.Language);
+          }
+
           ScriptSource source = engine.CreateScriptSourceFromString(info.ScriptCode, Microsoft.Scripting.SourceCodeKind.Statements);
           CompiledCode code = source.Compile();
           ScriptScope scope = engine.CreateScope();
-          scope.SetVariable("logger", Logger.CreateChildLogger(info.Name));
           scope.SetVariable("plugins", Plugins);
 
           foreach (var param in info.Parameters)
@@ -246,9 +233,7 @@ namespace Hamster.Scheduler
 
         foreach (EventInfo info in EventManager.GetItems())
         {
-          ScriptCommand command;
-
-          if (!commands.TryGetValue(info.CommandName, out command))
+          if (!commands.TryGetValue(info.CommandName, out var command))
           {
             Logger.Error("Error while loading the scheduler item '{0}'. Could not find a command with the name '{1}'.", info.Name, info.CommandName);
             continue;
@@ -293,8 +278,7 @@ namespace Hamster.Scheduler
 
     public ICommand GetCommand(string name)
     {
-      ScriptCommand result;
-      if (!commands.TryGetValue(name, out result))
+      if (!commands.TryGetValue(name, out var result))
       {
         return null;
       }

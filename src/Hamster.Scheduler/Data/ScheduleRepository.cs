@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Hamster.Scheduler.Repository;
-using NCM.Service.Scheduler.Repository;
 
 namespace Hamster.Scheduler.Data
 {
@@ -18,7 +17,7 @@ namespace Hamster.Scheduler.Data
         throw new ArgumentException("The 'path' parameter must not be empty");
 
       FileInfo file = new FileInfo(path);
-      if (!file.Directory.Exists)
+      if (file.Directory != null && !file.Directory.Exists)
       {
         file.Directory.Create();
       }

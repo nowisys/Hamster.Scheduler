@@ -6,19 +6,18 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Hamster.Scheduler.Repository;
 using Microsoft.Scripting.Hosting;
-using NCM.Service.Scheduler.Repository;
 
 namespace Hamster.Scheduler.Data
 {
   public class CommandRepository : IRepository<string, CommandInfo>
   {
-    private string directory;
-    private ScriptRuntime runtime;
+    private readonly string directory;
+    private readonly ScriptRuntime runtime;
 
     public CommandRepository(string directory, ScriptRuntime runtime)
     {
       if (runtime == null)
-        throw new ArgumentNullException("runtime");
+        throw new ArgumentNullException(nameof(runtime));
 
       DirectoryInfo dir = new DirectoryInfo(directory);
       this.runtime = runtime;
@@ -75,20 +74,20 @@ namespace Hamster.Scheduler.Data
     public void Add(CommandInfo item)
     {
       if (item == null)
-        throw new ArgumentNullException("item");
+        throw new ArgumentNullException(nameof(item));
       if (string.IsNullOrEmpty(item.Name))
         throw new ArgumentException("The 'Name' property of the item must be set.");
 
       string path = GetPath(item.Name);
       if (File.Exists(path))
-        throw new ArgumentException(string.Format("There is already a command with the name '{0}'.", item.Name));
+        throw new ArgumentException($"There is already a command with the name '{item.Name}'.");
       SaveCommand(item);
     }
 
     public void Update(string key, CommandInfo item)
     {
       if (item == null)
-        throw new ArgumentNullException("item");
+        throw new ArgumentNullException(nameof(item));
       if (string.IsNullOrEmpty(item.Name))
         throw new ArgumentException("The 'Name' property of the item must be set.");
 
@@ -96,7 +95,7 @@ namespace Hamster.Scheduler.Data
       {
         string path = GetPath(item.Name);
         if (File.Exists(path))
-          throw new ArgumentException(string.Format("There is already a command with the name '{0}'.", item.Name));
+          throw new ArgumentException($"There is already a command with the name '{item.Name}'.");
 
         if (!string.IsNullOrEmpty(key))
           Remove(key);
@@ -113,8 +112,7 @@ namespace Hamster.Scheduler.Data
     protected void SaveCommand(CommandInfo item)
     {
       string ext = item.Language ?? ".py";
-      ScriptEngine engine;
-      if (!runtime.TryGetEngineByFileExtension(ext, out engine))
+      if (!runtime.TryGetEngineByFileExtension(ext, out var engine))
       {
         engine = runtime.GetEngine(item.Language);
         ext = engine.Setup.FileExtensions.First();
@@ -188,26 +186,31 @@ namespace Hamster.Scheduler.Data
       XmlDocument doc = new XmlDocument();
       doc.LoadXml(header);
 
-      CommandInfo cmd = new CommandInfo();
-      cmd.Language = file.Extension;
-      cmd.Name = file.Name.Substring(0, file.Name.Length - file.Extension.Length);
-      cmd.ScriptCode = string.Join("\n", lines, codeStart, lines.Length - codeStart).TrimEnd();
-
-      foreach (XmlElement desc in doc.DocumentElement.GetElementsByTagName("description"))
+      CommandInfo cmd = new CommandInfo
       {
-        cmd.Description = desc.InnerText;
-      }
+        Language = file.Extension,
+        Name = file.Name.Substring(0, file.Name.Length - file.Extension.Length),
+        ScriptCode = string.Join("\n", lines, codeStart, lines.Length - codeStart).TrimEnd()
+      };
 
-      foreach (XmlElement param in doc.DocumentElement.GetElementsByTagName("param"))
+      if (doc.DocumentElement != null)
       {
-        cmd.Parameters.Add(new ParameterInfo()
+        foreach (XmlElement desc in doc.DocumentElement.GetElementsByTagName("description"))
         {
-          Command = cmd,
-          ParameterId = cmd.Parameters.Count + 1,
-          Name = param.GetAttribute("name"),
-          Type = param.GetAttribute("type"),
-          Description = param.InnerText
-        });
+          cmd.Description = desc.InnerText;
+        }
+
+        foreach (XmlElement param in doc.DocumentElement.GetElementsByTagName("param"))
+        {
+          cmd.Parameters.Add(new ParameterInfo()
+          {
+            Command = cmd,
+            ParameterId = cmd.Parameters.Count + 1,
+            Name = param.GetAttribute("name"),
+            Type = param.GetAttribute("type"),
+            Description = param.InnerText
+          });
+        }
       }
 
       return cmd;

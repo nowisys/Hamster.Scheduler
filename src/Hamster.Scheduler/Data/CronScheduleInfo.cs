@@ -14,11 +14,6 @@ namespace Hamster.Scheduler.Data
     private string daysOfMonth = "*";
     private string daysOfWeek = "*";
 
-    public CronScheduleInfo()
-    {
-
-    }
-
     [DataMember(Name = "name")]
     public string Name { get; set; }
 
@@ -28,7 +23,7 @@ namespace Hamster.Scheduler.Data
     [DataMember(Name = "minutes")]
     public string Minutes
     {
-      get { return minutes; }
+      get => minutes;
       set
       {
         if (string.IsNullOrEmpty(value))
@@ -46,7 +41,7 @@ namespace Hamster.Scheduler.Data
     [DataMember(Name = "hours")]
     public string Hours
     {
-      get { return hours; }
+      get => hours;
       set
       {
         if (string.IsNullOrEmpty(value))
@@ -64,7 +59,7 @@ namespace Hamster.Scheduler.Data
     [DataMember(Name = "months")]
     public string Months
     {
-      get { return months; }
+      get => months;
       set
       {
         if (string.IsNullOrEmpty(value))
@@ -82,7 +77,7 @@ namespace Hamster.Scheduler.Data
     [DataMember(Name = "daysOfMonth")]
     public string DaysOfMonth
     {
-      get { return daysOfMonth; }
+      get => daysOfMonth;
       set
       {
         if (string.IsNullOrEmpty(value))
@@ -100,7 +95,7 @@ namespace Hamster.Scheduler.Data
     [DataMember(Name = "daysOfWeek")]
     public string DaysOfWeek
     {
-      get { return daysOfWeek; }
+      get => daysOfWeek;
       set
       {
         if (string.IsNullOrEmpty(value))

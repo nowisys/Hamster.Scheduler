@@ -2,7 +2,7 @@
 
 namespace Hamster.Scheduler
 {
-  [XmlRoot("settings", Namespace = "http://www.nupis.de/ncm/plugins/services/scheduler.xsd")]
+  [XmlRoot("settings", Namespace = "http://www.nowisys.de/hamster/plugins/services/scheduler.xsd")]
   public class SchedulerPluginSettings
   {
     public SchedulerPluginSettings()

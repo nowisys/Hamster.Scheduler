@@ -5,17 +5,16 @@ namespace Hamster.Scheduler
 {
   public class SchedulerQueue : IList<ISchedulerItem>
   {
-    private List<ISchedulerItem> items = new List<ISchedulerItem>();
-    private List<ISchedulerItem> itemHeap = new List<ISchedulerItem>();
-    private Dictionary<string, int> itemHeapIndex = new Dictionary<string, int>();
+    private readonly List<ISchedulerItem> items = new List<ISchedulerItem>();
+    private readonly List<ISchedulerItem> itemHeap = new List<ISchedulerItem>();
+    private readonly Dictionary<string, int> itemHeapIndex = new Dictionary<string, int>();
 
     private void SinkItem(int heapIndex)
     {
       int childIndex = heapIndex * 2 + 1;
       while (childIndex < itemHeap.Count)
       {
-        if (childIndex + 1 < itemHeap.Count
-                                          && ItemFromHeapIndex(childIndex).NextStart > ItemFromHeapIndex(childIndex + 1).NextStart)
+        if (childIndex + 1 < itemHeap.Count && ItemFromHeapIndex(childIndex).NextStart > ItemFromHeapIndex(childIndex + 1).NextStart)
         {
           childIndex++;
         }
@@ -32,10 +31,9 @@ namespace Hamster.Scheduler
 
     private void RaiseItem(int heapIndex)
     {
-      int parentIndex;
       while (heapIndex > 0)
       {
-        parentIndex = (heapIndex - 1) / 2;
+        var parentIndex = (heapIndex - 1) / 2;
         if (ItemFromHeapIndex(parentIndex).NextStart <= ItemFromHeapIndex(heapIndex).NextStart)
           break;
 
@@ -80,30 +78,7 @@ namespace Hamster.Scheduler
 
     protected virtual void OnItemsChanged(EventArgs args)
     {
-      EventHandler handler = ItemsChanged;
-      if (handler != null)
-      {
-        handler(this, args);
-      }
-    }
-
-    public bool TryGetValue(string name, out ISchedulerItem value)
-    {
-      int heapIndex;
-
-      if (!itemHeapIndex.TryGetValue(name, out heapIndex))
-      {
-        value = null;
-        return false;
-      }
-
-      value = ItemFromHeapIndex(heapIndex);
-      return true;
-    }
-
-    public ISchedulerItem this[string name]
-    {
-      get { return ItemFromHeapIndex(itemHeapIndex[name]); }
+      ItemsChanged?.Invoke(this, args);
     }
 
     public int IndexOf(ISchedulerItem item)
@@ -118,11 +93,14 @@ namespace Hamster.Scheduler
       int heapIndex = itemHeap.Count;
       itemHeap.Add(item);
 
-      itemHeapIndex[item.Name] = heapIndex;
+      if (item != null)
+      {
+        itemHeapIndex[item.Name] = heapIndex;
 
-      RaiseItem(heapIndex);
+        RaiseItem(heapIndex);
 
-      item.Increased += ItemIncreased;
+        item.Increased += ItemIncreased;
+      }
 
       OnItemsChanged(EventArgs.Empty);
     }
@@ -134,10 +112,7 @@ namespace Hamster.Scheduler
 
     public ISchedulerItem this[int index]
     {
-      get
-      {
-        return items[index];
-      }
+      get => items[index];
       set
       {
         items[index].Increased -= ItemIncreased;
@@ -170,8 +145,8 @@ namespace Hamster.Scheduler
 
     public bool Contains(ISchedulerItem item)
     {
-      int heapIndex;
-      if (!itemHeapIndex.TryGetValue(item.Name, out heapIndex))
+      int heapIndex = 0;
+      if (item != null && !itemHeapIndex.TryGetValue(item.Name, out heapIndex))
         return false;
       return ItemFromHeapIndex(heapIndex) == item;
     }
@@ -181,32 +156,29 @@ namespace Hamster.Scheduler
       items.CopyTo(array, arrayIndex);
     }
 
-    public int Count
-    {
-      get { return items.Count; }
-    }
+    public int Count => items.Count;
 
-    bool ICollection<ISchedulerItem>.IsReadOnly
-    {
-      get { return false; }
-    }
+    bool ICollection<ISchedulerItem>.IsReadOnly => false;
 
     public virtual bool Remove(ISchedulerItem item)
     {
-      int heapIndex;
-      if (!itemHeapIndex.TryGetValue(item.Name, out heapIndex))
+      int heapIndex = 0;
+      if (item != null && !itemHeapIndex.TryGetValue(item.Name, out heapIndex))
         return false;
 
       if (ItemFromHeapIndex(heapIndex) != item)
         return false;
 
-      item.Increased -= ItemIncreased;
+      if (item != null)
+      {
+        item.Increased -= ItemIncreased;
 
-      SwapHeap(heapIndex, itemHeap.Count - 1);
+        SwapHeap(heapIndex, itemHeap.Count - 1);
 
-      items.Remove(item);
-      itemHeap.RemoveAt(itemHeap.Count - 1);
-      itemHeapIndex.Remove(item.Name);
+        items.Remove(item);
+        itemHeap.RemoveAt(itemHeap.Count - 1);
+        itemHeapIndex.Remove(item.Name);
+      }
 
       if (heapIndex < Count)
       {

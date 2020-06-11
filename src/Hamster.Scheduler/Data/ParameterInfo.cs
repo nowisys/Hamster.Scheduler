@@ -7,11 +7,6 @@ namespace Hamster.Scheduler.Data
   [DataContract()]
   public class ParameterInfo
   {
-    public ParameterInfo()
-    {
-
-    }
-
     public int ParameterId { get; set; }
     public CommandInfo Command { get; set; }
 

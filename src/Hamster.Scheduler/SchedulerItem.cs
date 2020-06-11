@@ -8,46 +8,36 @@ namespace Hamster.Scheduler
 {
   public class SchedulerItem : ISchedulerItem
   {
-    private string name;
-    private ICommand command;
-    private IDictionary<string, object> parameters;
-    private ISchedule schedule;
+    private readonly ICommand command;
+    private readonly IDictionary<string, object> parameters;
+    private readonly ISchedule schedule;
 
     private DateTime lastStart;
 
     public SchedulerItem(string name, ISchedule schedule, ICommand command, IDictionary<string, object> parameters)
     {
-      if (string.IsNullOrEmpty(this.name = name))
-        throw new ArgumentNullException("name");
+      if (string.IsNullOrEmpty(this.Name = name))
+        throw new ArgumentNullException(nameof(name));
 
       if ((this.command = command) == null)
-        throw new ArgumentNullException("command");
+        throw new ArgumentNullException(nameof(command));
 
       if ((this.parameters = parameters) == null)
-        throw new ArgumentNullException("parameters");
+        throw new ArgumentNullException(nameof(parameters));
 
       if ((this.schedule = schedule) == null)
-        throw new ArgumentNullException("schedule");
+        throw new ArgumentNullException(nameof(schedule));
 
       lastStart = DateTime.MinValue;
 
       this.schedule.Initialize(DateTime.Now);
     }
 
-    public string Name
-    {
-      get { return name; }
-    }
+    public string Name { get; }
 
-    public DateTime NextStart
-    {
-      get { return schedule.NextDate; }
-    }
+    public DateTime NextStart => schedule.NextDate;
 
-    public DateTime LastStart
-    {
-      get { return lastStart; }
-    }
+    public DateTime LastStart => lastStart;
 
     public event EventHandler<ISchedulerItem, EventArgs> Invoked;
 
@@ -58,20 +48,14 @@ namespace Hamster.Scheduler
       command.Invoke(parameters);
       lastStart = DateTime.Now;
 
-      if (Invoked != null)
-      {
-        Invoked(this, EventArgs.Empty);
-      }
+      Invoked?.Invoke(this, EventArgs.Empty);
     }
 
     public void Increase()
     {
       schedule.Increase();
 
-      if (Increased != null)
-      {
-        Increased(this, EventArgs.Empty);
-      }
+      Increased?.Invoke(this, EventArgs.Empty);
     }
   }
 }

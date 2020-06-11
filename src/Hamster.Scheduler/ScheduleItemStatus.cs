@@ -28,15 +28,15 @@ namespace Hamster.Scheduler
     [DataMember(Name = "next")]
     public DateTime? NextStart
     {
-      get { return nextStart; }
-      set { nextStart = Validate(value); }
+      get => nextStart;
+      set => nextStart = Validate(value);
     }
 
     [DataMember(Name = "last")]
     public DateTime? LastStart
     {
-      get { return lastStart; }
-      set { lastStart = Validate(value); }
+      get => lastStart;
+      set => lastStart = Validate(value);
     }
 
     private DateTime? Validate(DateTime? value)
